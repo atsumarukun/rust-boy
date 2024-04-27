@@ -1,0 +1,10 @@
+services:
+  main:
+    build: .
+    volumes:
+      - .:/opt/rust-boy
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    working_dir: /opt/rust-boy
+    environment:
+      DISPLAY: unix$DISPLAY
+    tty: true

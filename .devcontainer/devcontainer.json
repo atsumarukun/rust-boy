@@ -1,0 +1,23 @@
+{
+  "dockerComposeFile": [
+    "../compose.yml"
+  ],
+  "service": "main",
+  "workspaceFolder": "/opt/rust-boy",
+  "postAttachCommand": "git config --global --add safe.directory /opt/rust-boy",
+  "updateRemoteUserUID": false,
+  "containerEnv": {
+    "SHELL": "/bin/bash"
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "git.openRepositoryInParentFolders": "always"
+      },
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "shardulm94.trailing-spaces"
+      ]
+    }
+  }
+}
