@@ -1,2 +1,5 @@
 # Build Outputs
 target
+
+# Boot ROM
+dmg_bootrom.bin
