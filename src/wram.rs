@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct WRam(Box<[u8; 0x2000]>);
 
 impl WRam {

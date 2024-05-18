@@ -1,7 +1,7 @@
 use sdl2;
 use std::time;
 
-use crate::{bootrom::Bootrom, cpu::Cpu, lcd::LCD, peripherals::Peripherals};
+use crate::{bootrom::Bootrom, cartridge::Cartridge, cpu::Cpu, lcd::LCD, peripherals::Peripherals};
 
 pub const CPU_CLOCK_HZ: u128 = 4_194_304;
 pub const M_CYCLE_CLOCK: u128 = 4;
@@ -14,10 +14,10 @@ pub struct GameBoy {
 }
 
 impl GameBoy {
-  pub fn new(bootrom: Bootrom) -> Self {
+  pub fn new(bootrom: Bootrom, cartridge: Cartridge) -> Self {
     let sdl = sdl2::init().expect("failed to initialize SDL");
     let lcd = LCD::new(&sdl, 4);
-    let peripherals = Peripherals::new(bootrom);
+    let peripherals = Peripherals::new(bootrom, cartridge);
     let cpu = Cpu::new();
     Self {
       cpu,
@@ -33,6 +33,10 @@ impl GameBoy {
       let e = time.elapsed().as_nanos();
       for _ in 0..(e - elapsed) / M_CYCLE_NANOS {
         self.cpu.emulate_cycle(&mut self.peripherals);
+        self
+          .peripherals
+          .timer
+          .emulate_cycle(&mut self.cpu.interrupts);
         if self.peripherals.ppu.emulate_cycle() {
           self.lcd.draw(self.peripherals.ppu.pixel_buffer());
         }

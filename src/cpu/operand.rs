@@ -1,10 +1,7 @@
 use std::sync::atomic::{AtomicU16, AtomicU8, Ordering::Relaxed};
 
 use crate::{
-  cpu::{
-    instructions::{go, step},
-    Cpu,
-  },
+  cpu::{go, step, Cpu},
   peripherals::Peripherals,
 };
 
@@ -123,7 +120,7 @@ impl IO8<Imm8> for Cpu {
   fn read8(&mut self, bus: &Peripherals, _: Imm8) -> Option<u8> {
     step!(None, {
       0: {
-        VAL8.store(bus.read(self.regs.pc), Relaxed);
+        VAL8.store(bus.read(&self.interrupts, self.regs.pc), Relaxed);
         self.regs.pc = self.regs.pc.wrapping_add(1);
         go!(1);
         return None;
@@ -168,19 +165,19 @@ impl IO8<Indirect> for Cpu {
     step!(None, {
       0: {
         VAL8.store(match src {
-          Indirect::BC => bus.read(self.regs.bc()),
-          Indirect::DE => bus.read(self.regs.de()),
-          Indirect::HL => bus.read(self.regs.hl()),
-          Indirect::CFF => bus.read(0xFF00 | (self.regs.c as u16)),
+          Indirect::BC => bus.read(&self.interrupts, self.regs.bc()),
+          Indirect::DE => bus.read(&self.interrupts, self.regs.de()),
+          Indirect::HL => bus.read(&self.interrupts, self.regs.hl()),
+          Indirect::CFF => bus.read(&self.interrupts, 0xFF00 | (self.regs.c as u16)),
           Indirect::HLD => {
             let addr = self.regs.hl();
             self.regs.write_hl(addr.wrapping_sub(1));
-            bus.read(addr)
+            bus.read(&self.interrupts, addr)
           },
           Indirect::HLI => {
             let addr = self.regs.hl();
             self.regs.write_hl(addr.wrapping_add(1));
-            bus.read(addr)
+            bus.read(&self.interrupts, addr)
           },
         }, Relaxed);
         go!(1);
@@ -197,19 +194,19 @@ impl IO8<Indirect> for Cpu {
     step!(None, {
       0: {
         match dst {
-          Indirect::BC => bus.write(self.regs.bc(), val),
-          Indirect::DE => bus.write(self.regs.de(), val),
-          Indirect::HL => bus.write(self.regs.hl(), val),
-          Indirect::CFF => bus.write(0xFF00 | (self.regs.c as u16), val),
+          Indirect::BC => bus.write(&mut self.interrupts, self.regs.bc(), val),
+          Indirect::DE => bus.write(&mut self.interrupts, self.regs.de(), val),
+          Indirect::HL => bus.write(&mut self.interrupts, self.regs.hl(), val),
+          Indirect::CFF => bus.write(&mut self.interrupts, 0xFF00 | (self.regs.c as u16), val),
           Indirect::HLD => {
             let addr = self.regs.hl();
             self.regs.write_hl(addr.wrapping_sub(1));
-            bus.write(addr, val);
+            bus.write(&mut self.interrupts, addr, val);
           },
           Indirect::HLI => {
             let addr = self.regs.hl();
             self.regs.write_hl(addr.wrapping_add(1));
-            bus.write(addr, val);
+            bus.write(&mut self.interrupts, addr, val);
           },
         }
         go!(1);
@@ -236,7 +233,7 @@ impl IO8<Direct8> for Cpu {
         go!(2);
       },
       2: {
-        VAL8.store(bus.read(VAL16.load(Relaxed)), Relaxed);
+        VAL8.store(bus.read(&self.interrupts, VAL16.load(Relaxed)), Relaxed);
         go!(3);
         return None;
       },
@@ -262,7 +259,7 @@ impl IO8<Direct8> for Cpu {
         go!(2);
       },
       2: {
-        bus.write(VAL16.load(Relaxed), val);
+        bus.write(&mut self.interrupts, VAL16.load(Relaxed), val);
         go!(3);
         return None;
       },
@@ -287,12 +284,12 @@ impl IO16<Direct16> for Cpu {
         go!(2);
       },
       2: {
-        bus.write(VAL16.load(Relaxed), val as u8);
+        bus.write(&mut self.interrupts, VAL16.load(Relaxed), val as u8);
         go!(3);
         return None;
       },
       3: {
-        bus.write(VAL16.load(Relaxed).wrapping_add(1), (val >> 8) as u8);
+        bus.write(&mut self.interrupts, VAL16.load(Relaxed).wrapping_add(1), (val >> 8) as u8);
         go!(4);
         return None;
       },

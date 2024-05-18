@@ -3,3 +3,10 @@ target
 
 # Boot ROM
 dmg_bootrom.bin
+
+# ROM
+POKEMON.GB
+
+# Test ROM
+cpu_instrs.gb
+instr_timing.gb

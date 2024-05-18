@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct HRam(Box<[u8; 0x80]>);
 
 impl HRam {
