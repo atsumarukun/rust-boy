@@ -10,3 +10,4 @@ POKEMON.GB
 # Test ROM
 cpu_instrs.gb
 instr_timing.gb
+dmg-acid2.gb

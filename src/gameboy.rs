@@ -37,7 +37,13 @@ impl GameBoy {
           .peripherals
           .timer
           .emulate_cycle(&mut self.cpu.interrupts);
-        if self.peripherals.ppu.emulate_cycle() {
+        if let Some(addr) = self.peripherals.ppu.oam_dma {
+          self
+            .peripherals
+            .ppu
+            .oam_dma_emulate_cycle(self.peripherals.read(&self.cpu.interrupts, addr));
+        }
+        if self.peripherals.ppu.emulate_cycle(&mut self.cpu.interrupts) {
           self.lcd.draw(self.peripherals.ppu.pixel_buffer());
         }
         elapsed += M_CYCLE_NANOS;

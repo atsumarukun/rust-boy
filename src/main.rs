@@ -17,7 +17,7 @@ fn main() {
   let mut ret = vec![];
   file.read_to_end(&mut ret).unwrap();
 
-  let mut file = File::open("./POKEMON.GB").expect("file not found");
+  let mut file = File::open("./dmg-acid2.gb").expect("file not found");
 
   let mut data = vec![];
   file.read_to_end(&mut data).unwrap();
