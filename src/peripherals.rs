@@ -1,6 +1,6 @@
 use crate::{
-  bootrom::Bootrom, cartridge::Cartridge, cpu::interrupts::Interrupts, hram::HRam, ppu::Ppu,
-  timer::Timer, wram::WRam,
+  bootrom::Bootrom, cartridge::Cartridge, cpu::interrupts::Interrupts, hram::HRam, joypad::Joypad,
+  ppu::Ppu, timer::Timer, wram::WRam,
 };
 
 pub struct Peripherals {
@@ -8,6 +8,7 @@ pub struct Peripherals {
   pub cartridge: Cartridge,
   pub ppu: Ppu,
   pub timer: Timer,
+  pub joypad: Joypad,
   wram: WRam,
   hram: HRam,
 }
@@ -19,6 +20,7 @@ impl Peripherals {
       cartridge,
       ppu: Ppu::new(),
       timer: Timer::default(),
+      joypad: Joypad::new(),
       wram: WRam::new(),
       hram: HRam::new(),
     }
@@ -38,6 +40,7 @@ impl Peripherals {
       0xA000..=0xBFFF => self.cartridge.read(addr),
       0xC000..=0xFDFF => self.wram.read(addr),
       0xFE00..=0xFE9F => self.ppu.read(addr),
+      0xFF00 => self.joypad.read(),
       0xFF04..=0xFF07 => self.timer.read(addr),
       0xFF0F => interrupts.read(addr),
       0xFF40..=0xFF4B => self.ppu.read(addr),
@@ -59,6 +62,7 @@ impl Peripherals {
       0xA000..=0xBFFF => self.cartridge.write(addr, val),
       0xC000..=0xFDFF => self.wram.write(addr, val),
       0xFE00..=0xFE9F => self.ppu.write(addr, val),
+      0xFF00 => self.joypad.write(addr, val),
       0xFF04..=0xFF07 => self.timer.write(addr, val),
       0xFF0F => interrupts.write(addr, val),
       0xFF40..=0xFF4B => self.ppu.write(addr, val),
