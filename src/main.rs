@@ -1,5 +1,7 @@
 use std::{fs::File, io::Read};
 
+mod apu;
+mod audio;
 mod bootrom;
 mod cartridge;
 mod cpu;

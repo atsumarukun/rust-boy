@@ -28,6 +28,7 @@ impl Timer {
       self.overflow = overflow;
     }
   }
+
   pub fn read(&self, addr: u16) -> u8 {
     match addr {
       0xFF04 => (self.div >> 8) as u8,
@@ -37,6 +38,7 @@ impl Timer {
       _ => unreachable!(),
     }
   }
+
   pub fn write(&mut self, addr: u16, val: u8) {
     match addr {
       0xFF04 => self.div = 0,

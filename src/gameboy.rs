@@ -2,12 +2,12 @@ use sdl2::{self, event::Event, keyboard::Keycode, Sdl};
 use std::time;
 
 use crate::{
-  bootrom::Bootrom, cartridge::Cartridge, cpu::Cpu, joypad::Button, lcd::LCD,
+  audio::Audio, bootrom::Bootrom, cartridge::Cartridge, cpu::Cpu, joypad::Button, lcd::LCD,
   peripherals::Peripherals,
 };
 
 pub const CPU_CLOCK_HZ: u128 = 4_194_304;
-pub const M_CYCLE_CLOCK: u128 = 4;
+const M_CYCLE_CLOCK: u128 = 4;
 const M_CYCLE_NANOS: u128 = M_CYCLE_CLOCK * 1_000_000_000 / CPU_CLOCK_HZ;
 
 fn key2joy(keycode: Keycode) -> Option<Button> {
@@ -35,7 +35,8 @@ impl GameBoy {
   pub fn new(bootrom: Bootrom, cartridge: Cartridge) -> Self {
     let sdl = sdl2::init().expect("failed to initialize SDL");
     let lcd = LCD::new(&sdl, 4);
-    let peripherals = Peripherals::new(bootrom, cartridge);
+    let audio = Audio::new(&sdl);
+    let peripherals = Peripherals::new(bootrom, cartridge, audio);
     let cpu = Cpu::new();
     Self {
       cpu,
@@ -81,6 +82,7 @@ impl GameBoy {
           .peripherals
           .timer
           .emulate_cycle(&mut self.cpu.interrupts);
+        self.peripherals.apu.emulate_cycle();
         if let Some(addr) = self.peripherals.ppu.oam_dma {
           self
             .peripherals

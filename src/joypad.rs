@@ -61,7 +61,7 @@ impl Joypad {
   }
 
   pub fn write(&mut self, _: u16, val: u8) {
-    self.mode = 0x30 & val
+    self.mode = 0x30 & val;
   }
 
   pub fn button_down(&mut self, interrupts: &mut Interrupts, button: Button) {
